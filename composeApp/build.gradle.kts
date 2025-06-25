@@ -61,6 +61,7 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation("com.russhwolf:multiplatform-settings-datastore:1.1.1")
+            implementation("io.ktor:ktor-client-okhttp:2.3.7")
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -83,9 +84,11 @@ kotlin {
             implementation(libs.kotlinx.coroutinesSwing)
             implementation("com.russhwolf:multiplatform-settings:1.1.1")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+            implementation("io.ktor:ktor-client-cio:2.3.7")
         }
         iosMain.dependencies {
             implementation("com.russhwolf:multiplatform-settings-apple:1.1.1")
+            implementation("io.ktor:ktor-client-darwin:2.3.7")
         }
     }
 }
@@ -119,6 +122,12 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    implementation("io.ktor:ktor-client-core:2.3.7")
+    implementation("io.ktor:ktor-client-json:2.3.7")
+    implementation("io.ktor:ktor-client-serialization:2.3.7")
+    implementation("io.ktor:ktor-client-logging:2.3.7")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
 }
 
 compose.desktop {
