@@ -81,7 +81,8 @@ kotlin {
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
-            implementation("com.russhwolf:multiplatform-settings-preferences:1.1.1")
+            implementation("com.russhwolf:multiplatform-settings:1.1.1")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
         }
         iosMain.dependencies {
             implementation("com.russhwolf:multiplatform-settings-apple:1.1.1")
