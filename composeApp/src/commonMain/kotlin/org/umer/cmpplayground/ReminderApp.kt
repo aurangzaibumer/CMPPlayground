@@ -26,9 +26,6 @@ fun ReminderApp() {
     fun refresh() { reminders = repository.getAll() }
 
     Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Reminder App") })
-        },
         bottomBar = {
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text("VentureDive", style = MaterialTheme.typography.bodySmall)
