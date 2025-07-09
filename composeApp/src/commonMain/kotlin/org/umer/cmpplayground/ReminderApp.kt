@@ -31,7 +31,7 @@ fun ReminderApp() {
         },
         bottomBar = {
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("Created by Umer", style = MaterialTheme.typography.bodySmall)
+                Text("VentureDive", style = MaterialTheme.typography.bodySmall)
             }
         },
         floatingActionButton = {
