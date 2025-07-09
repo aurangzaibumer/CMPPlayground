@@ -1,5 +1,7 @@
 // Weather + Daily Inspiration UI
 // Created by Umer
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package org.umer.cmpplayground
 
 import androidx.compose.foundation.layout.*
@@ -17,30 +19,40 @@ import kotlinx.coroutines.launch
 @Composable
 fun WeatherInspirationScreen() {
     val repo = remember { WeatherInspirationRepository() }
-    var lat by remember { mutableStateOf(40.7128) } // Default: New York
-    var lon by remember { mutableStateOf(-74.0060) }
+    val locationService = remember { LocationService() }
+    
+    var selectedLocation by remember { mutableStateOf<LocationData?>(null) }
     var weather by remember { mutableStateOf<WeatherResponse?>(null) }
     var quote by remember { mutableStateOf<InspirationQuote?>(null) }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var expanded by remember { mutableStateOf(false) }
+    
     val scope = rememberCoroutineScope()
+    val locations = locationService.getPopularLocations()
 
     fun refresh() {
-        loading = true
-        error = null
-        scope.launch {
-            try {
-                weather = repo.fetchWeather(lat, lon)
-                quote = repo.fetchInspiration()
-            } catch (e: Exception) {
-                error = "Failed to load data."
-            } finally {
-                loading = false
+        selectedLocation?.let { location ->
+            loading = true
+            error = null
+            scope.launch {
+                try {
+                    weather = repo.fetchWeather(location.latitude, location.longitude)
+                    quote = repo.fetchInspiration()
+                } catch (e: Exception) {
+                    error = "Failed to load data: ${e.message}"
+                } finally {
+                    loading = false
+                }
             }
         }
     }
 
-    LaunchedEffect(Unit) { refresh() }
+    // Auto-select first location and load data on start
+    LaunchedEffect(Unit) {
+        selectedLocation = locations.first()
+        refresh()
+    }
 
     Column(
         Modifier
@@ -52,31 +64,88 @@ fun WeatherInspirationScreen() {
             "Weather & Daily Inspiration",
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, fontSize = 24.sp)
         )
+        
         Spacer(Modifier.height(16.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(
-                value = lat.toString(),
-                onValueChange = { it.toDoubleOrNull()?.let { v -> lat = v } },
-                label = { Text("Latitude") },
+        
+        // Location Selector with Refresh Button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded },
                 modifier = Modifier.weight(1f)
-            )
-            Spacer(Modifier.width(8.dp))
-            OutlinedTextField(
-                value = lon.toString(),
-                onValueChange = { it.toDoubleOrNull()?.let { v -> lon = v } },
-                label = { Text("Longitude") },
-                modifier = Modifier.weight(1f)
-            )
+            ) {
+                OutlinedTextField(
+                    value = selectedLocation?.cityName ?: "Select City",
+                    onValueChange = { },
+                    readOnly = true,
+                    label = { Text("Location") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    modifier = Modifier.menuAnchor()
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    locations.forEach { location ->
+                        DropdownMenuItem(
+                            text = { Text("${location.cityName} (${location.latitude}, ${location.longitude})") },
+                            onClick = {
+                                selectedLocation = location
+                                expanded = false
+                                refresh()
+                            }
+                        )
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.width(8.dp))
+            
+            // Refresh Icon Button
+            IconButton(
+                onClick = { refresh() },
+                enabled = !loading && selectedLocation != null,
+                modifier = Modifier.size(56.dp)
+            ) {
+                Card(
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (loading) MaterialTheme.colorScheme.surfaceVariant 
+                                       else MaterialTheme.colorScheme.primary
+                    ),
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        if (loading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        } else {
+                            Text(
+                                text = "🔄",
+                                fontSize = 20.sp,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
+                }
+            }
         }
-        Spacer(Modifier.height(8.dp))
-        Button(onClick = { refresh() }, enabled = !loading) {
-            Text(if (loading) "Loading..." else "Refresh")
-        }
+        
         Spacer(Modifier.height(24.dp))
+        
         if (error != null) {
             Text(error!!, color = MaterialTheme.colorScheme.error)
             Spacer(Modifier.height(16.dp))
         }
+        
         // Weather Section
         Card(
             Modifier.fillMaxWidth(),
@@ -85,6 +154,14 @@ fun WeatherInspirationScreen() {
         ) {
             Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("Current Weather", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                selectedLocation?.let { location ->
+                    Text(
+                        "📍 ${location.cityName}",
+                        fontSize = 14.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
                 Spacer(Modifier.height(8.dp))
                 weather?.current_weather?.let {
                     Text("Temperature: ${it.temperature ?: "-"}°C", fontSize = 16.sp)
@@ -93,7 +170,9 @@ fun WeatherInspirationScreen() {
                 } ?: Text("No weather data.", color = Color.Gray)
             }
         }
+        
         Spacer(Modifier.height(24.dp))
+        
         // Inspiration Section
         Card(
             Modifier.fillMaxWidth(),
