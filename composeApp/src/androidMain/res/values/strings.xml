@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CMP Playground</string>
+    <string name="widget_description">Shows nearest available ride with ETA and fare</string>
 </resources>
