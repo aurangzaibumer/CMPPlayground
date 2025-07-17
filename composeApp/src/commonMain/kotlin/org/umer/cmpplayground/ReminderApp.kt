@@ -25,11 +25,6 @@ fun ReminderApp() {
     fun refresh() { reminders = repository.getAll() }
 
     Scaffold(
-        bottomBar = {
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("VentureDive", style = MaterialTheme.typography.bodySmall)
-            }
-        },
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 editReminder = null
