@@ -69,6 +69,12 @@ fun App(contentPadding: PaddingValues = PaddingValues()) {
                     onClick = { selectedTab = 1 },
                     modifier = Modifier.weight(1f)
                 )
+                TabButton(
+                    text = "Rides",
+                    isSelected = selectedTab == 2,
+                    onClick = { selectedTab = 2 },
+                    modifier = Modifier.weight(1f)
+                )
             }
             
             // Content Area
@@ -80,10 +86,10 @@ fun App(contentPadding: PaddingValues = PaddingValues()) {
                 color = MaterialTheme.colorScheme.background
             ) {
                 Box(modifier = Modifier.padding(16.dp)) {
-                    if (selectedTab == 0) {
-                        ReminderApp()
-                    } else {
-                        WeatherInspirationScreen()
+                    when (selectedTab) {
+                        0 -> ReminderApp()
+                        1 -> WeatherInspirationScreen()
+                        2 -> RideHailingWidget()
                     }
                 }
             }

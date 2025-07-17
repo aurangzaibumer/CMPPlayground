@@ -4,7 +4,6 @@
 package org.umer.cmpplayground
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
@@ -26,11 +25,6 @@ fun ReminderApp() {
     fun refresh() { reminders = repository.getAll() }
 
     Scaffold(
-        bottomBar = {
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text("VentureDive", style = MaterialTheme.typography.bodySmall)
-            }
-        },
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 editReminder = null
